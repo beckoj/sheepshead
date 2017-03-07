@@ -1,0 +1,70 @@
+.card {
+  width: 130px;
+  height: 180px;
+  border: 0.3px solid hsl(0, 0%, 81%);
+  position: absolute;
+  border-radius: 5px;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  transition-duration: 0.8s;
+}
+
+.card.bigger:hover {
+  margin-top: -50px;
+  border-color: hsl(90, 100%, 50%);
+  border-width: 3px;
+  width: 135px;
+  height: 195px;
+  box-shadow: 0 12px 20px 0 rgba(0, 0, 0, 0.8);
+  transition-duration: 0.5s;
+}
+
+div.hand {
+  display: flex;
+  margin-top: 60px;
+}
+
+div.hand img.card {
+  position: static;
+  left: 0;
+  right: 0;
+}
+
+div.hand img.card:not(:first-of-type) {
+  margin-left: -72px;
+}
+
+body {
+  position: relative;
+  margin: 10px;
+}
+
+button {
+  background-color: #01ABFF;
+  color: white;
+  font-weight: bold;
+  padding: 12px 27px;
+  border-color: #54C7FF #54C7FF #54C7FF #54C7FF;
+  border-style: solid;
+  border-width: 2px;
+  font-family: "arial", sans-serif;
+  font-variant: small-caps;
+  font-size: 16px;
+  border-radius: 1px;
+  transition-duration: 0.25s;
+  text-align: center;
+  margin-top: 7px;
+}
+button:active {
+  background-color: 6375FF;
+  vertical-align: top;
+  padding: 11px 29px;
+}
+
+button:focus {
+  outline: none;
+}
+button:hover {
+  background-color: #7DD5FF;
+  transition-duration: 0.25s;
+  cursor: pointer;
+}
