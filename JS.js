@@ -1,8 +1,35 @@
 var module = (function () { // nothing should be before this line
 
+//  Nathaniel's dumb ideaas about how you do data. WHOOOO!
+//  var deck = [
+//    {
+//      suit: 'diamond', // hearts || diamonds || spades || clubs
+//      rank: 4,
+//      points: 4,
+//      number: 21,
+//      image: './Card Images/21.png'
+//    },
+//    {
+//      suit: 'diamond', // hearts || diamonds || spades || clubs
+//      rank: 4,
+//      points: 4,
+//      number: 21,
+//      image: './Card Images/21.png'
+//    }
+//  ];
+//  
+//  var players = {
+//   player1: {
+//     hand: [], // full of cards
+//     tricks: [],
+//     activeCard: null, // a card
+//   }
+//  };
+  
+  
   var randomIndex;
   var x = 0,
-    y = 100;
+      y = 100;
   var selectedCard;
   var theDeck = [];
   var deckDealPosition = 0;
@@ -18,7 +45,9 @@ var module = (function () { // nothing should be before this line
   var priorSelectedCard;
   var x;
   var y;
-  var dragStatus = "";
+
+  var dragging = false,
+      placeCard = false; // if true, place card on board, else snap back
 
   var trick = {
     firstCard: "",
@@ -157,7 +186,7 @@ var module = (function () { // nothing should be before this line
 
   function shuffle(theDeck) {
     var currentIndex = theDeck.length,
-      temporaryValue, randomIndex;
+        temporaryValue, randomIndex;
 
     while (0 !== currentIndex) {
 
@@ -234,28 +263,27 @@ var module = (function () { // nothing should be before this line
   }
 
   function dragStart(event) {
-    dragStatus = "dragging";
+    dragging = true;
+
     event.preventDefault();
     activeCard = event.target;
-    dragging();
+    dragCard();
     render();
-    document.addEventListener('mousemove', dragging);
+    document.addEventListener('mousemove', dragCard);
   }
-
-  function dragging() {
+  function dragCard() {
     document.addEventListener('onmouseup', dragEnd);
     x = event.clientX;
     y = event.clientY;
 
   }
-
   function dragEnd(event) {
-    dragStatus = "";
+    dragging = false;
+
     document.removeEventListener('onmouseup', dragEnd);
     priorSelectedCard = selectedCard;
     selectedCard = event.target;
 
-    //    if (event.clientX >= 730 && parseInt(selectedCard.getAttribute("data-cardOwner")) == currentPlayer && cardsBuried >= 2) {
     //      activeCard.style.transitionDuration = "0.5s";
     //      activeCard.classList.remove("bigger");
     //      topCard++;
@@ -271,8 +299,38 @@ var module = (function () { // nothing should be before this line
     //
     //    }
 
+    /*
 
-    document.removeEventListener('mousemove', dragging);
+    card can be placed if
+
+      - card belongs to active player
+      - blind pick is over
+      - in play area
+
+    */
+
+    var cardBelongsToPlayer = parseInt(selectedCard.getAttribute("data-cardOwner")) == currentPlayer, // evalutates to true or false
+        blindIsOver = cardsBuried >= 2,
+        cardInPlayArea = event.clientX >= 730;
+
+    if (cardBelongsToPlayer && blindIsOver && cardInPlayArea) {
+      placeCard = true;
+      
+      activeCard.removeEventListener('mousedown', dragStart);
+
+      topCard++;
+      currentPlayer += 1;
+
+      if (currentPlayer == 3) currentPlayer = 0;
+
+      cardPlayed();
+    }
+    
+    else {
+      placeCard = false; 
+    }
+
+    document.removeEventListener('mousemove', dragCard);
 
   }
 
@@ -297,6 +355,7 @@ var module = (function () { // nothing should be before this line
       trick.thirdCard = activeCard;
       activeCard = "";
     }
+    
     trick.points = (parseInt(trick.firstCard.getAttribute("data-cardPoints")) + parseInt(trick.secondCard.getAttribute("data-cardPoints")) + parseInt(trick.thirdCard.getAttribute("data-cardPoints")));
     determineWinner();
 
@@ -370,6 +429,9 @@ var module = (function () { // nothing should be before this line
 
 
   function render() {
+
+    var cardOwner = parseInt(activeCard.getAttribute("data-cardOwner"));
+
     // check data, use that data to change DOM
     if (activeCard != "") {
       activeCard.style.position = "absolute";
@@ -379,22 +441,19 @@ var module = (function () { // nothing should be before this line
       activeCard.style.left = x - 80 + 'px';
       activeCard.style.zIndex = topCard;
     }
+    
+    // deals with placement of cards in playarea
+    if ( !dragging ) {
+      if ( placeCard ) {
+        //      activeCard.style.transitionDuration = "0.5s";
+        activeCard.classList.remove("bigger");
+      } 
 
-    if (parseInt(activeCard.style.left) >= 730 && parseInt(activeCard.getAttribute("data-cardOwner")) == currentPlayer && cardsBuried >= 2 && dragStatus == "") {
-      //      activeCard.style.transitionDuration = "0.5s";
-      activeCard.classList.remove("bigger");
-      activeCard.removeEventListener('mousedown', dragStart);
-      topCard++;
-      currentPlayer += 1;
-      if (currentPlayer == 3) {
-        currentPlayer = 0;
+      else if ( !placeCard ) {
+        activeCard.style.position = "";
+        activeCard.style.zIndex = "";
+        activeCard.style.marginLeft = "";
       }
-      cardPlayed();
-    } else if (dragStatus == "" && parseInt(activeCard.style.left) <= 730) {
-      activeCard.style.position = "";
-      activeCard.style.zIndex = "";
-      activeCard.style.marginLeft = "";
-
     }
 
     requestAnimationFrame(render);
