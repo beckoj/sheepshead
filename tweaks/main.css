@@ -1,0 +1,199 @@
+ div {
+/*   border: 3px dashed black;*/
+ }
+ 
+ #appFrame {
+   position: absolute;
+   top: 0;
+   right: 0;
+   left: 0;
+   bottom: 0;
+   width: 1024px;
+   margin: auto;
+   height: 730px;
+   background-image: url("../Environment/table.PNG");
+ }
+ 
+ #playArea {
+   position: absolute;
+   width: 40%;
+   height: 40%;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;
+   margin: auto;
+   border-radius: 50%;
+   border: 1px solid;
+   border-color: dimgrey;
+   background-image: url("../Environment/cloth.PNG");
+ }
+ 
+ #activePlayersTricks {
+   position: absolute;
+   bottom: 10px;
+   width: 10%;
+   height: 20%;
+   margin: auto;
+   left: 20px;
+   justify-content: center;
+   border: 0.3px solid hsl(0, 0%, 81%);
+   border-radius: 5px;
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+ }
+
+ #nextPlayersTricks {
+   position: absolute;
+   bottom: 540px;
+   margin: auto;
+   width: 10%;
+   height: 20%;
+   left: 360px;
+   top: 0;
+   justify-content: center;
+   border: 0.3px solid hsl(0, 0%, 81%);
+   border-radius: 5px;
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+   transform: rotate(180deg);
+ }
+
+ #previousPlayersTricks {
+   position: absolute;
+   bottom: 540px;
+   width: 10%;
+   height: 20%;
+   margin: auto;
+   left: 230px;
+   top: 0;
+   right: 0;
+   justify-content: center;
+   border: 0.3px solid hsl(0, 0%, 81%);
+   border-radius: 5px;
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+   transform: rotate(180deg);
+ }
+ 
+ #currentPlayer {
+   display: flex;
+   position: absolute;
+   bottom: 0;
+   width: 80%;
+   height: 25%;
+   margin: auto;
+   left: 0;
+   right: 0;
+   justify-content: center;
+   background-image: url("../Environment/cloth.PNG");
+ }
+ 
+ div#currentPlayer img.card:not(:first-of-type) {
+   margin-left: -72px;
+ }
+ 
+ #nextPlayer {
+   display: flex;
+   justify-content: center;
+   margin: auto;
+   position: absolute;
+   width: 25%;
+   height: 25%;
+   left: 35px;
+   top: 0;
+   background-image: url("../Environment/cloth.PNG")
+ }
+ 
+ div#nextPlayer img.nextOpponentCard:not(:first-of-type) {
+   margin-left: -100px;
+ }
+ 
+ #prevPlayer {
+   display: flex;
+   justify-content: center;
+   margin: auto;
+   position: absolute;
+   width: 25%;
+   height: 25%;
+   top: 0;
+   right: 35px;
+   background-image: url("../Environment/cloth.PNG")
+ }
+ 
+ div#prevPlayer img.previousOpponentCard:not(:first-of-type) {
+   margin-left: -100px;
+ }
+ 
+ .card {
+   height: 100%;
+   width: auto;
+   border: 0.3px solid hsl(0, 0%, 81%);
+   border-radius: 5px;
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+   transition-duration: 0.2s;
+ }
+ 
+ .nextOpponentCard {
+   transform: rotate(180deg);
+   height: 90%;
+   width: auto;
+   border: 0.3px solid hsl(0, 0%, 81%);
+   border-radius: 5px;
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+   transition-duration: 0.2s;
+   position: relative;
+   left: 0;
+   right: 0;
+ }
+ 
+ .previousOpponentCard {
+   transform: rotate(180deg);
+   height: 90%;
+   width: auto;
+   border: 0.3px solid hsl(0, 0%, 81%);
+   border-radius: 5px;
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+   transition-duration: 0.2s;
+   position: relative;
+   left: 0;
+   right: 0;
+ }
+ 
+ .card.bigger {
+   margin-top: -50px;
+   border-color: hsl(90, 100%, 50%);
+   border-width: 3px;
+   box-shadow: 0 12px 20px 0 rgba(0, 0, 0, 0.8);
+   transition-duration: 0.2s;
+ }
+ /*
+ button {
+   background-color: #01ABFF;
+   color: white;
+   font-weight: bold;
+   padding: 12px 27px;
+   border-color: #54C7FF #54C7FF #54C7FF #54C7FF;
+   border-style: solid;
+   border-width: 2px;
+   font-family: "arial", sans-serif;
+   font-variant: small-caps;
+   font-size: 16px;
+   border-radius: 1px;
+   transition-duration: 0.25s;
+   text-align: center;
+   margin-top: 7px;
+ }
+ 
+ button:active {
+   background-color: 6375FF;
+   vertical-align: top;
+   padding: 11px 29px;
+ }
+ 
+ button:focus {
+   outline: none;
+ }
+ 
+ button:hover {
+   background-color: #7DD5FF;
+   transition-duration: 0.1s;
+   cursor: pointer;
+ }*/
