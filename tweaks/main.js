@@ -4,141 +4,193 @@ var module = (function () { // nothing should be before this line
   var theBlind = [];
   var cardsBuried = 0;
   var cardOwner = 0;
-  var currentPlayer = 0;
+
+  var currentPlayer = null,
+      nextPlayer = 0;
+
   var activeCard = "";
   var priorSelectedCard;
   var selectedCard;
   var cardOffsets;
   var topCard = "";
-  var activeHand = document.getElementsByClassName("card");
   var x = 0,
-    y = 100;
+      y = 100;
 
   var xOffset = 0,
-    yOffset = 0;
+      yOffset = 0;
 
   var dragging = false;
   var placeCard = false;
-  var players = {
-    player0: {
+  var players = [
+    {
       hand: [], // full of cards
       tricks: [],
       activeCard: null, // a card
     },
-    player1: {
+    {
       hand: [], // full of cards
       tricks: [],
       activeCard: null, // a card
     },
-    player2: {
+    {
       hand: [], // full of cards
       tricks: [],
       activeCard: null, // a card
     },
-  };
-
+  ];
 
   window.addEventListener('load', function load() {
-    //      initialization area
     window.removeEventListener('load', load);
+    // initialization area
 
+    deck = shuffle(generateDeck());
 
+    dealAllHands();
+    
+    render();
 
-
-    for (var i = 0; i <= 31; i++) {
-      generateCard(i);
-    }
-    shuffle(deck);
-    dealHands();
-    displayFirstHands();
-    rotateCards();
-    //end initialization area
+    
+    // end initialization area
   });
 
-  function displayFirstHands() {
-    for (j = 0; j < (players.player0.hand.length - 1); j++) {
-      var newCard = document.createElement("img");
-      newCard.setAttribute("src", players.player0.hand[j].image);
-      newCard.classList.add("card");
-      newCard.addEventListener('touchstart', dragStart);
-      document.getElementById("currentPlayer").appendChild(newCard);
-      players.player0.hand[j].element = newCard;
-    }
-    for (i = 0; i < (players.player1.hand.length - 1); i++) {
-      var cardBack = document.createElement("img");
-      cardBack.setAttribute("src", "../Card Images/CardBack.png");
-      cardBack.classList.add("nextOpponentCard");
-      document.getElementById("nextPlayer").appendChild(cardBack);
-    }
-    for (y = 0; y < (players.player2.hand.length - 1); y++) {
-      var cardBack2 = document.createElement("img");
-      cardBack2.setAttribute("src", "../Card Images/CardBack.png");
-      cardBack2.classList.add("previousOpponentCard");
-      document.getElementById("prevPlayer").appendChild(cardBack2);
-    }
-    
+  function renderHands() {
+
+    var nextId = currentPlayer + 1, 
+        prevId = currentPlayer - 1,
+        startId = 0,
+        endId = players.length - 1;
+
+    if (nextId > endId)
+      nextId = startId;
+
+    if (prevId < 0)
+      prevId = endId;
+
+    var currentHand = document.querySelector('#current.player>.hand'),
+        nextHand = document.querySelector('#next.player>.hand'),
+        previousHand = document.querySelector('#previous.player>.hand');
+
+    currentHand.innerHTML = '';
+    nextHand.innerHTML = '';
+    previousHand.innerHTML = '';
+
+    players.forEach((player, playerNumber) => {
+      player.hand.forEach(card => {
+
+        var element = document.createElement('img');
+
+        element.classList.add('card');
+        element.addEventListener('touchstart', dragStart);
+
+        if (playerNumber === currentPlayer) {
+          element.setAttribute("src", card.image);
+          currentHand.appendChild(element);
+        }
+
+        else if (playerNumber === nextId) {
+          element.setAttribute("src", "../Card Images/CardBack.png");
+          nextHand.appendChild(element);
+        }
+
+        else if (playerNumber === prevId) {
+          element.setAttribute("src", "../Card Images/CardBack.png");
+          previousHand.appendChild(element);
+        }
+
+        card.element = element;
+      });
+    });
+  }
+  function rotateCards() {
+    players.forEach((player) => {
+      var hand = player.hand;
+      var midPoint = (hand.length - 1) / 2;
+
+      var totalDegrees = 30,
+          degreeIncrement = totalDegrees / hand.length,
+          currentDegrees = (totalDegrees / 2) * -1;
+
+      var deltaHeight = 30,
+          heightIncrement = deltaHeight / hand.length,
+          currentHeight = 0;
+
+      var multiplier = hand[0].element.offsetHeight / 15,
+          radius = (midPoint + 1) * multiplier;
+
+      hand.forEach((card, index) => {
+        var fakeX = (index - midPoint) * multiplier;
+
+        currentHeight = -Math.sqrt((radius * radius) - (fakeX * fakeX));
+        currentDegrees += (degreeIncrement);
+
+        card.element.style.transform = "rotate(" + currentDegrees + "deg) translate(0px, " + (currentHeight + 50) + "px)";
+      });
+    });
   }
 
+  function rotatePlayers() {
+    nextPlayer++;
+
+    console.log(currentPlayer, nextPlayer);
+
+    if (nextPlayer > (players.length - 1)) {
+      nextPlayer = 0; 
+    }
+  }
+
+  function generateDeck() {
+    var deckSize = 31,
+        deck = []
+
+    for (var i = 0; i <= deckSize; i++) {
+      deck.push(generateCard(i));
+    }
+
+    return deck;
+  }
   function generateCard(cardNumber) {
 
-    var newCard = {
-      suit: "",
-      number: 0,
-      rank: 0,
-      points: 0,
+    var suit, rank, points;
+
+    if (cardNumber < 6) {
+      suit = "clubs";
+      rank = cardNumber + 1;
+    }
+    else if (cardNumber >= 6 && cardNumber < 12) {
+      suit = "hearts";
+      rank = cardNumber - 5;
+    }
+    else if (cardNumber >= 12 && cardNumber < 18) {
+      suit = "spades";
+      rank = cardNumber - 11;
+    }
+    else if (cardNumber >= 18) {
+      suit = "diamonds";
+      rank = cardNumber - 17;
+    }
+
+    if (rank == 4) points = 4;
+    else if (rank == 5) points = 10;
+    else if (rank == 6) points = 11;
+    else if (rank >= 7 && rank <= 10) points = 2;
+    else if (rank >= 11 && rank <= 14) points = 3;
+    else points = 0;
+
+
+    return {
+      number: cardNumber,
+      suit: suit,
+      rank: rank,
+      points: points,
       image: "../Card Images/" + (cardNumber + 1) + ".png",
-      owner: "",
-      element: "",
+      owner: 0,
+      element: null
     };
-    deck[cardNumber] = newCard;
-    newCard.number = cardNumber;
-
-    if (cardNumber < 6) {
-      newCard.suit = "clubs";
-    }
-    if (cardNumber < 12 && cardNumber >= 6) {
-      newCard.suit = "hearts";
-
-    }
-    if (cardNumber < 18 && cardNumber >= 12) {
-      newCard.suit = "spades";
-    }
-    if (cardNumber >= 18) {
-      newCard.suit = "diamonds";
-    }
-
-
-    if (cardNumber < 6) {
-      newCard.rank = cardNumber + 1;
-    }
-    if (cardNumber < 12 && cardNumber >= 6) {
-      newCard.rank = cardNumber - 5;
-    }
-    if (cardNumber < 18 && cardNumber >= 12) {
-      newCard.rank = cardNumber - 11;
-    }
-    if (cardNumber >= 18) {
-      newCard.rank = cardNumber - 17;
-    }
-
-    if (newCard.rank == 4) {
-      newCard.points = 4;
-    } else if (newCard.rank == 5) {
-      newCard.points = 10;
-    } else if (newCard.rank == 6) {
-      newCard.points = 11;
-    } else if (newCard.rank >= 7 && newCard.rank <= 10) {
-      newCard.points = 2;
-    } else if (newCard.rank >= 11 && newCard.rank <= 14) {
-      newCard.points = 3;
-    } else {
-      newCard.points = 0;
-    }
   }
 
   function shuffle(deck) {
     var currentIndex = deck.length,
-      temporaryValue, randomIndex;
+        temporaryValue, randomIndex;
 
     while (0 !== currentIndex) {
 
@@ -149,127 +201,55 @@ var module = (function () { // nothing should be before this line
       deck[currentIndex] = deck[randomIndex];
       deck[randomIndex] = temporaryValue;
     }
+    
+    return deck;
   }
 
-  function dealHands(numberOfHands) {
+  function dealAllHands(numberOfHands) {
     numberOfHands = numberOfHands || 3;
-    var theClasses = document.getElementsByClassName("hand");
+
     for (; numberOfHands--;) {
-      players["player" + numberOfHands].hand.push({
-        cards: sortHand(dealHand())
-      });
+
+      players[numberOfHands].hand = sortHand(dealHand());
       cardOwner++;
     }
   }
-
   function dealHand() {
     var theCards = [];
+
     for (i = 0; i < 10; i++) {
       theCards[i] = deck[deckDealPosition];
-      players['player' + cardOwner].hand[i] = deck[deckDealPosition];
-      theCards[i].owner = cardOwner;
+      theCards[i].owner = (cardOwner == 3) ? "theBlind" : cardOwner;
       deckDealPosition++;
-
     }
-    if (cardOwner == 3) {
-      for (i = 0; i <= 1; i++) {
-        theBlind[i] = deck[deckDealPosition];
-        theBlind[i].owner = "theBlind";
-        deckDealPosition++;
 
-      }
-    }
-    return players['player' + cardOwner].hand;
+    return theCards;
   }
 
   function sortHand(theHand) {
     theHand.sort(function (a, b) {
-
       return parseInt(a.number - b.number);
     });
+
     return theHand;
-  }
-
-  function rotateCards() {
-    var theActiveCards = document.getElementsByClassName("card");
-    var midPoint = (theActiveCards.length - 1) / 2;
-    var totalDegrees = 30;
-    var currentDegrees = (totalDegrees / 2) * -1;
-    var degreeIncrement = totalDegrees / theActiveCards.length;
-    var deltaHeight = 30;
-    var heightIncrement = deltaHeight / theActiveCards.length;
-    var currentHeight = 0;
-    var multiplier = theActiveCards[0].offsetHeight / 15;
-    var radius = (midPoint + 1) * multiplier;
-
-
-    for (i = 0; i < theActiveCards.length; i++) {
-      var fakeX = (i - midPoint) * multiplier;
-
-      currentHeight = -Math.sqrt((radius * radius) - (fakeX * fakeX));
-      currentDegrees += (degreeIncrement);
-      theActiveCards[i].style.transform = "rotate(" + currentDegrees + "deg) translate(0px, " + (currentHeight + 50) + "px)";
-    } 
-    
-    
-    
-    
-    var theActiveCards = document.getElementsByClassName("nextOpponentCard");
-    var midPoint = (theActiveCards.length - 1) / 2;
-    var totalDegrees = -30;
-    var currentDegrees = (totalDegrees / 2) * -1;
-    var degreeIncrement = totalDegrees / theActiveCards.length;
-    var deltaHeight = 30;
-    var heightIncrement = deltaHeight / theActiveCards.length;
-    var currentHeight = 0;
-    var multiplier = theActiveCards[0].offsetHeight / 15;
-    var radius = (midPoint + 1) * multiplier;
-
-
-    for (i = 0; i < theActiveCards.length; i++) {
-      var fakeX = (i - midPoint) * multiplier;
-
-      currentHeight = -Math.sqrt((radius * radius) - (fakeX * fakeX));
-      currentDegrees += (degreeIncrement);
-      theActiveCards[i].style.transform = "rotate(" + (currentDegrees - 180) + "deg) translate(0px, " + (currentHeight + 30) + "px)";
-    } 
-    
-    
-    var theActiveCards = document.getElementsByClassName("previousOpponentCard");
-    var midPoint = (theActiveCards.length - 1) / 2;
-    var totalDegrees = -30;
-    var currentDegrees = (totalDegrees / 2) * -1;
-    var degreeIncrement = totalDegrees / theActiveCards.length;
-    var deltaHeight = 30;
-    var heightIncrement = deltaHeight / theActiveCards.length;
-    var currentHeight = 0;
-    var multiplier = theActiveCards[0].offsetHeight / 15;
-    var radius = (midPoint + 1) * multiplier;
-
-
-    for (i = 0; i < theActiveCards.length; i++) {
-      var fakeX = (i - midPoint) * multiplier;
-
-      currentHeight = -Math.sqrt((radius * radius) - (fakeX * fakeX));
-      currentDegrees += (degreeIncrement);
-      theActiveCards[i].style.transform = "rotate(" + (currentDegrees - 180) + "deg) translate(0px, " + (currentHeight + 30) + "px)";
-    } 
   }
 
   function dragStart(event) {
     event.preventDefault();
     dragging = true;
-    players.player0.activeCard = players.player0.hand.find(function (card) {
+    players[currentPlayer].activeCard = players[currentPlayer].hand.find(function (card) {
       return (event.target == card.element);
     });
-    var activeCard = players.player0.activeCard;
+    var activeCard = players[currentPlayer].activeCard;
     var activeCardElement = activeCard.element;
     cardOffsets = activeCardElement.getBoundingClientRect();
     dragCard(event);
     render();
+    
     document.addEventListener('mousemove', dragCard);
+    document.addEventListener('mouseup', dragEnd);
+
     document.addEventListener('touchmove', dragCard);
-    document.addEventListener('onmouseup', dragEnd);
     document.addEventListener('touchend', dragEnd);
   }
 
@@ -287,14 +267,12 @@ var module = (function () { // nothing should be before this line
   function dragEnd(event) {
     dragging = false;
 
-    document.removeEventListener('onmouseup', dragEnd);
-    document.removeEventListener('touchend', dragEnd);
     priorSelectedCard = selectedCard;
     selectedCard = event.target;
 
     var cardBelongsToPlayer = selectedCard.owner == currentPlayer, // evalutates to true or false
-      blindIsOver = cardsBuried >= 2,
-      cardInPlayArea = event.clientX >= 730; //ADJUST FOR NEW PLAY AREA
+        blindIsOver = cardsBuried >= 2,
+        cardInPlayArea = event.clientX >= 730; //ADJUST FOR NEW PLAY AREA
 
     if (cardBelongsToPlayer && blindIsOver && cardInPlayArea) {
       placeCard = true;
@@ -312,41 +290,56 @@ var module = (function () { // nothing should be before this line
     }
 
     document.removeEventListener('mousemove', dragCard);
-    document.removeEventListener('touchmove', dragCard);
+    document.removeEventListener('mouseup', dragEnd);
 
+    document.removeEventListener('touchmove', dragCard);
+    document.removeEventListener('touchend', dragEnd);
   }
 
   function render() {
 
-    //    var cardOwner = activeCard.owner;
-    var activeCard = players.player0.activeCard;
-    var activeCardElement = activeCard.element; //move to dragstart and save top as y offset and left as x offset
+    // this renders cards if the next player is not the same as the current
+    if (currentPlayer != nextPlayer) {
+      currentPlayer = nextPlayer;
 
-    // check data, use that data to change DOM
-    if (players.player0.activeCard != "") {
-      activeCardElement.style.transform = "rotate(0deg) translate(0px, 0px)";
-      activeCardElement.classList.add("bigger", "card");
-      activeCardElement.style.transitionDuration = "0s";
-      activeCardElement.style.position = "relative";
-      activeCardElement.style.top = (y - cardOffsets.top) + 'px'; //Use these lines to move the cards fluidly
-      activeCardElement.style.left = (x - cardOffsets.left - 70) + 'px';
-      activeCardElement.style.zIndex = topCard;
+      renderHands();
+      rotateCards();
     }
 
-    // deals with placement of cards in playarea
-    if (!dragging) {
+    var activeCard = players[currentPlayer].activeCard;
 
-      if (placeCard) {
-        //      activeCard.style.transitionDuration = "0.5s";
-        activeCard.classList.remove("bigger");
-      } else if (!placeCard) {
-        activeCardElement.style.position = "";
-        activeCardElement.style.zIndex = "";
-        activeCardElement.style.marginLeft = "";
+    // check data, use that data to change DOM
+    if (activeCard) {
+      
+      var activeCardElement = activeCard.element; //move to dragstart and save top as y offset and left as x offset
+
+      if (dragging) {
+        activeCardElement.classList.add("bigger", "card");
+        activeCardElement.style.position = "relative";
+        activeCardElement.style.top = (y - cardOffsets.top) + 'px'; //Use these lines to move the cards fluidly
+        activeCardElement.style.left = (x - cardOffsets.left - 70) + 'px';
+        activeCardElement.style.zIndex = topCard;
+      }
+
+      // deals with placement of cards in playarea
+      if (!dragging) {
+        activeCardElement.classList.remove("bigger");
+
+        if (!placeCard) {
+          activeCardElement.style.position = "";
+          activeCardElement.style.zIndex = "";
+          activeCardElement.style.marginLeft = "";
+        }
+        
+        players[currentPlayer].activeCard = null;
       }
     }
 
     requestAnimationFrame(render);
+  }
+
+  return {
+    nextPlayer: rotatePlayers
   }
 
 }()); // nothing should be past this line
