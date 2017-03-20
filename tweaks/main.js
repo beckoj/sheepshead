@@ -2,14 +2,13 @@ var module = (function () { // nothing should be before this line
   var deck = [];
   var deckDealPosition = 0;
   var theBlind = [];
-  var cardsBuried = 0;
+  var cardsBuried = 2; //CHANGE TO 0 AGAIN
   var cardOwner = 0;
 
   var currentPlayer = null,
-      nextPlayer = 0;
+      nextPlayer = 1;
 
   var activeCard = "";
-  var priorSelectedCard;
   var selectedCard;
   var cardOffsets;
   var topCard = "";
@@ -101,6 +100,7 @@ var module = (function () { // nothing should be before this line
       });
     });
   }
+  
   function rotateCards() {
     players.forEach((player) => {
       var hand = player.hand;
@@ -130,8 +130,6 @@ var module = (function () { // nothing should be before this line
 
   function rotatePlayers() {
     nextPlayer++;
-
-    console.log(currentPlayer, nextPlayer);
 
     if (nextPlayer > (players.length - 1)) {
       nextPlayer = 0; 
@@ -267,24 +265,27 @@ var module = (function () { // nothing should be before this line
   function dragEnd(event) {
     dragging = false;
 
-    priorSelectedCard = selectedCard;
-    selectedCard = event.target;
+    selectedCard = players[currentPlayer].activeCard;
 
     var cardBelongsToPlayer = selectedCard.owner == currentPlayer, // evalutates to true or false
+        playArea = document.getElementById("playArea").getBoundingClientRect(),
+        playXMin = playArea.left,
+        playXMax = playArea.right,
+        playYMax = playArea.bottom,
+        playYMin = playArea.top,
         blindIsOver = cardsBuried >= 2,
-        cardInPlayArea = event.clientX >= 730; //ADJUST FOR NEW PLAY AREA
+        cardInPlayArea = (x >= playXMin && x < playXMax && y >= playYMin && y < playYMax); //ADJUST FOR NEW PLAY AREA
 
-    if (cardBelongsToPlayer && blindIsOver && cardInPlayArea) {
+    if (blindIsOver && cardInPlayArea) {
       placeCard = true;
-
-      activeCard.removeEventListener('mousedown', dragStart);
+      selectedCard.element.removeEventListener('touchstart', dragStart);
 
       topCard++;
       currentPlayer += 1;
 
       if (currentPlayer == 3) currentPlayer = 0;
 
-      cardPlayed();
+//      cardPlayed();
     } else {
       placeCard = false;
     }
@@ -301,7 +302,6 @@ var module = (function () { // nothing should be before this line
     // this renders cards if the next player is not the same as the current
     if (currentPlayer != nextPlayer) {
       currentPlayer = nextPlayer;
-
       renderHands();
       rotateCards();
     }
@@ -314,7 +314,7 @@ var module = (function () { // nothing should be before this line
       var activeCardElement = activeCard.element; //move to dragstart and save top as y offset and left as x offset
 
       if (dragging) {
-        activeCardElement.classList.add("bigger", "card");
+        activeCardElement.classList.add("bigger");
         activeCardElement.style.position = "relative";
         activeCardElement.style.top = (y - cardOffsets.top) + 'px'; //Use these lines to move the cards fluidly
         activeCardElement.style.left = (x - cardOffsets.left - 70) + 'px';
@@ -332,6 +332,7 @@ var module = (function () { // nothing should be before this line
         }
         
         players[currentPlayer].activeCard = null;
+        activeCard = null;
       }
     }
 

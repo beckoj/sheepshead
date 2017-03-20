@@ -1,5 +1,5 @@
  div {
-/*   border: 3px dashed black;*/
+   /*   border: 3px dashed black;*/
  }
  
  #appFrame {
@@ -25,8 +25,9 @@
    margin: auto;
    border-radius: 50%;
    border: 1px solid;
-   border-color: dimgrey;
+   border-color: black;
    background-image: url("Environment/cloth.PNG");
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.80);
  }
  
  #activePlayersTricks {
@@ -39,9 +40,10 @@
    justify-content: center;
    border: 0.3px solid hsl(0, 0%, 81%);
    border-radius: 5px;
-   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+   box-shadow: 0px -9px 25px 6px rgba(0, 0, 0, 0.50);
+   filter: contrast(80%);
  }
-
+ 
  #nextPlayersTricks {
    position: absolute;
    bottom: 540px;
@@ -53,10 +55,11 @@
    justify-content: center;
    border: 0.3px solid hsl(0, 0%, 81%);
    border-radius: 5px;
-   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+   box-shadow: 0px -9px 25px 6px rgba(0, 0, 0, 0.80);
    transform: rotate(180deg);
+   filter: contrast(80%);
  }
-
+ 
  #previousPlayersTricks {
    position: absolute;
    bottom: 540px;
@@ -69,8 +72,9 @@
    justify-content: center;
    border: 0.3px solid hsl(0, 0%, 81%);
    border-radius: 5px;
-   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+   box-shadow: 0px -9px 25px 6px rgba(0, 0, 0, 0.80);
    transform: rotate(180deg);
+   filter: contrast(80%);
  }
  
  #currentPlayer {
@@ -84,6 +88,8 @@
    right: 0;
    justify-content: center;
    background-image: url("Environment/cloth.PNG");
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.80);
+   border-radius: 5px;
  }
  
  div#currentPlayer img.card:not(:first-of-type) {
@@ -99,7 +105,9 @@
    height: 25%;
    left: 35px;
    top: 0;
-   background-image: url("Environment/cloth.PNG")
+   background-image: url("Environment/cloth.PNG");
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.80);
+   border-radius: 5px;
  }
  
  div#nextPlayer img.nextOpponentCard:not(:first-of-type) {
@@ -115,7 +123,9 @@
    height: 25%;
    top: 0;
    right: 35px;
-   background-image: url("Environment/cloth.PNG")
+   background-image: url("Environment/cloth.PNG");
+   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.80);
+   border-radius: 5px;
  }
  
  div#prevPlayer img.previousOpponentCard:not(:first-of-type) {
@@ -142,6 +152,7 @@
    position: relative;
    left: 0;
    right: 0;
+   filter: contrast(80%);
  }
  
  .previousOpponentCard {
@@ -155,6 +166,7 @@
    position: relative;
    left: 0;
    right: 0;
+   filter: contrast(80%);
  }
  
  .card.bigger {
