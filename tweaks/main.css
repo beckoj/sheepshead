@@ -25,7 +25,13 @@
   background-image: url("../Environment/cloth.PNG");
 }
 
-/* begin N's tweaks */
+#playArea .card {
+  height: 50%;
+  width: auto;
+  border: 0.3px solid hsl(0, 0%, 81%);
+  border-radius: 5px;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 
 .player {
   position: absolute;
@@ -52,7 +58,7 @@
 }
 
 .player:not(#current) {
-  width: 33%;  
+  width: 33%;
 }
 
 .won {
@@ -60,12 +66,22 @@
   height: 100%;
 }
 
-#next.player>.won { left: 100%; transform: rotate(180deg);}
-#previous.player>.won { right: 100%; transform: rotate(180deg);}
-#current.player>.won { right: 100%; }
+#next.player>.won {
+  left: 100%;
+  transform: rotate(180deg);
+}
+
+#previous.player>.won {
+  right: 100%;
+  transform: rotate(180deg);
+}
+
+#current.player>.won {
+  right: 100%;
+}
 
 .hand {
-  width: 100%; 
+  width: 100%;
   height: 90%;
   display: flex;
   justify-content: center;
@@ -74,7 +90,6 @@
 .player:not(#current) .hand {
   transform: rotate(180deg);
 }
-
 
 .card {
   height: 80%;
@@ -85,9 +100,19 @@
   transition-duration: 0.2s;
 }
 
+#playedCard {
+  height: 100%;
+  width: auto;
+  border: 0.3px solid hsl(0, 0%, 81%);
+  border-radius: 5px;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  transition-duration: 0.2s;
+}
+
 #current.player>.hand>.card {
   height: 100%;
 }
+
 #current.player>.hand>.card:not(:first-of-type) {
   margin-left: -72px;
 }
@@ -95,9 +120,11 @@
 .player:not(#current)>.hand>.card {
   height: 90%;
 }
+
 .player:not(#current)>.hand>.card:not(:first-of-type) {
   margin-left: -90px;
 }
+
 
 /* end N's tweaks */
 
@@ -145,6 +172,44 @@
   transform: rotate(180deg);
 }
 
+#cardPlayZone {
+  position: absolute;
+  width: 13%;
+  height: 25%;
+  margin: auto;
+  left: 1px;
+  bottom: 1px;
+  top: 120px;
+  right: 0;
+  justify-content: center;
+  border: 3px solid red;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+}
+
+#lastCardPlayZone {
+  position: absolute;
+  width: 9%;
+  height: 17%;
+  margin: auto;
+  bottom: 380px;
+  right: 110px;
+  justify-content: center;
+  border: 3px solid red;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+}
+
+#nextCardPlayZone {
+  position: absolute;
+  width: 9%;
+  height: 17%;
+  margin: auto;
+  bottom: 380px;
+  right: 790px;
+  justify-content: center;
+  border: 3px solid red;
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.29);
+}
+
 .nextOpponentCard {
   transform: rotate(180deg);
   height: 90%;
@@ -179,3 +244,77 @@
   transition-duration: 0s;
   transform: rotate(0deg) translate(0px, 0px) !important;
 }
+
+
+ #nextTurn {
+   background-color: #01ABFF;
+   position: absolute;
+   right: 20px;
+   bottom: 100px;
+   color: white;
+   font-weight: bold;
+   padding: 12px 27px;
+   border-color: #54C7FF #54C7FF #54C7FF #54C7FF;
+   border-style: solid;
+   border-width: 2px;
+   font-family: "arial", sans-serif;
+   font-variant: small-caps;
+   font-size: 16px;
+   border-radius: 1px;
+   transition-duration: 0.25s;
+   text-align: center;
+   margin-top: 7px;
+ }
+ 
+ #nextTurn:active {
+   background-color: 6375FF;
+   vertical-align: top;
+   padding: 11px 29px;
+ }
+ 
+ #nextTurn:focus {
+   outline: none;
+ }
+ 
+ #nextTurn:hover {
+   background-color: #7DD5FF;
+   transition-duration: 0.1s;
+   cursor: pointer;
+ }
+
+
+#SelectNewCard {
+   background-color: #01ABFF;
+   position: absolute;
+   right: 6px;
+   bottom: 20px;
+   color: white;
+   font-weight: bold;
+   padding: 12px 27px;
+   border-color: #54C7FF #54C7FF #54C7FF #54C7FF;
+   border-style: solid;
+   border-width: 2px;
+   font-family: "arial", sans-serif;
+   font-variant: small-caps;
+   font-size: 16px;
+   border-radius: 1px;
+   transition-duration: 0.25s;
+   text-align: center;
+   margin-top: 7px;
+ }
+ 
+ #SelectNewCard:active {
+   background-color: 6375FF;
+   vertical-align: top;
+   padding: 11px 29px;
+ }
+ 
+ #SelectNewCard:focus {
+   outline: none;
+ }
+ 
+ #SelectNewCard:hover {
+   background-color: #7DD5FF;
+   transition-duration: 0.1s;
+   cursor: pointer;
+ }

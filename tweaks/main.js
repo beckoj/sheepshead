@@ -1,63 +1,85 @@
 var module = (function () { // nothing should be before this line
   var deck = [];
+  var tricks = [];
   var deckDealPosition = 0;
   var theBlind = [];
   var cardsBuried = 2; //CHANGE TO 0 AGAIN
   var cardOwner = 0;
+  var playAreaElement;
+  var nextTurnButton;
+  var rerenderHands = true;
 
   var currentPlayer = null,
-      nextPlayer = 1;
+    nextPlayer = 0;
 
   var activeCard = "";
   var selectedCard;
+  var priorSelectedCard;
   var cardOffsets;
-  var topCard = "";
+  var handElement;
+  var priorPlayArea;
+  var priorCardInPlay;
   var x = 0,
-      y = 100;
+    y = 100;
 
   var xOffset = 0,
-      yOffset = 0;
+    yOffset = 0;
 
   var dragging = false;
   var placeCard = false;
+  var priorPlaceCard = false;
+  var cardsSelected = 0;
   var players = [
     {
       hand: [], // full of cards
       tricks: [],
       activeCard: null, // a card
+      priorActiveCard: null,
     },
     {
       hand: [], // full of cards
       tricks: [],
       activeCard: null, // a card
+      priorActiveCard: null,
     },
     {
       hand: [], // full of cards
       tricks: [],
       activeCard: null, // a card
+      priorActiveCard: null,
     },
   ];
+
 
   window.addEventListener('load', function load() {
     window.removeEventListener('load', load);
     // initialization area
 
+    nextTurnButton = document.getElementById('nextTurn');
+    nextTurnButton.addEventListener("click", nextTurn);
+
+    SelectNewCard = document.getElementById('SelectNewCard');
+    SelectNewCard.addEventListener("click", renderHands);
+    SelectNewCard.addEventListener("click", rotateCards);
+    SelectNewCard.addEventListener("click", selectNewCard);
+
     deck = shuffle(generateDeck());
 
     dealAllHands();
-    
+
     render();
 
-    
+
     // end initialization area
   });
 
+
   function renderHands() {
 
-    var nextId = currentPlayer + 1, 
-        prevId = currentPlayer - 1,
-        startId = 0,
-        endId = players.length - 1;
+    var nextId = currentPlayer + 1,
+      prevId = currentPlayer - 1,
+      startId = 0,
+      endId = players.length - 1;
 
     if (nextId > endId)
       nextId = startId;
@@ -66,8 +88,8 @@ var module = (function () { // nothing should be before this line
       prevId = endId;
 
     var currentHand = document.querySelector('#current.player>.hand'),
-        nextHand = document.querySelector('#next.player>.hand'),
-        previousHand = document.querySelector('#previous.player>.hand');
+      nextHand = document.querySelector('#next.player>.hand'),
+      previousHand = document.querySelector('#previous.player>.hand');
 
     currentHand.innerHTML = '';
     nextHand.innerHTML = '';
@@ -76,46 +98,44 @@ var module = (function () { // nothing should be before this line
     players.forEach((player, playerNumber) => {
       player.hand.forEach(card => {
 
-        var element = document.createElement('img');
+        if (card.inPlay == false) {
+          var element = document.createElement('img');
 
-        element.classList.add('card');
-        element.addEventListener('touchstart', dragStart);
+          element.classList.add('card');
+          element.addEventListener('touchstart', dragStart);
 
-        if (playerNumber === currentPlayer) {
-          element.setAttribute("src", card.image);
-          currentHand.appendChild(element);
+          if (playerNumber === currentPlayer) {
+            element.setAttribute("src", card.image);
+            currentHand.appendChild(element);
+          } else if (playerNumber === nextId) {
+            element.setAttribute("src", "../Card Images/CardBack.jpg");
+            nextHand.appendChild(element);
+          } else if (playerNumber === prevId) {
+            element.setAttribute("src", "../Card Images/CardBack.jpg");
+            previousHand.appendChild(element);
+          }
+
+          card.element = element;
         }
-
-        else if (playerNumber === nextId) {
-          element.setAttribute("src", "../Card Images/CardBack.png");
-          nextHand.appendChild(element);
-        }
-
-        else if (playerNumber === prevId) {
-          element.setAttribute("src", "../Card Images/CardBack.png");
-          previousHand.appendChild(element);
-        }
-
-        card.element = element;
       });
     });
   }
-  
+
   function rotateCards() {
     players.forEach((player) => {
       var hand = player.hand;
       var midPoint = (hand.length - 1) / 2;
 
       var totalDegrees = 30,
-          degreeIncrement = totalDegrees / hand.length,
-          currentDegrees = (totalDegrees / 2) * -1;
+        degreeIncrement = totalDegrees / hand.length,
+        currentDegrees = (totalDegrees / 2) * -1;
 
       var deltaHeight = 30,
-          heightIncrement = deltaHeight / hand.length,
-          currentHeight = 0;
+        heightIncrement = deltaHeight / hand.length,
+        currentHeight = 0;
 
       var multiplier = hand[0].element.offsetHeight / 15,
-          radius = (midPoint + 1) * multiplier;
+        radius = (midPoint + 1) * multiplier;
 
       hand.forEach((card, index) => {
         var fakeX = (index - midPoint) * multiplier;
@@ -128,17 +148,37 @@ var module = (function () { // nothing should be before this line
     });
   }
 
+  function nextTurn() {
+    if (placeCard) {
+      handElement = document.getElementsByClassName('hand');
+      players[currentPlayer].priorActiveCard.inPlay = true;
+      handElement[2].removeChild(players[currentPlayer].priorActiveCard.element);
+      rerenderHands = true;
+
+      
+      priorPlayArea = document.getElementById('lastCardPlayZone');
+      priorCardInPlay = document.createElement('img');
+      priorCardInPlay.setAttribute("src", players[currentPlayer].priorActiveCard.image);
+      priorCardInPlay.setAttribute("id", 'playedCard');
+      priorPlayArea.appendChild(priorCardInPlay);
+    }
+  }
+
+  function selectNewCard() {
+    players[currentPlayer].activeCard.inPlay = false;
+  }
+
   function rotatePlayers() {
     nextPlayer++;
 
     if (nextPlayer > (players.length - 1)) {
-      nextPlayer = 0; 
+      nextPlayer = 0;
     }
   }
 
   function generateDeck() {
     var deckSize = 31,
-        deck = []
+      deck = []
 
     for (var i = 0; i <= deckSize; i++) {
       deck.push(generateCard(i));
@@ -146,6 +186,7 @@ var module = (function () { // nothing should be before this line
 
     return deck;
   }
+
   function generateCard(cardNumber) {
 
     var suit, rank, points;
@@ -153,16 +194,13 @@ var module = (function () { // nothing should be before this line
     if (cardNumber < 6) {
       suit = "clubs";
       rank = cardNumber + 1;
-    }
-    else if (cardNumber >= 6 && cardNumber < 12) {
+    } else if (cardNumber >= 6 && cardNumber < 12) {
       suit = "hearts";
       rank = cardNumber - 5;
-    }
-    else if (cardNumber >= 12 && cardNumber < 18) {
+    } else if (cardNumber >= 12 && cardNumber < 18) {
       suit = "spades";
       rank = cardNumber - 11;
-    }
-    else if (cardNumber >= 18) {
+    } else if (cardNumber >= 18) {
       suit = "diamonds";
       rank = cardNumber - 17;
     }
@@ -180,15 +218,16 @@ var module = (function () { // nothing should be before this line
       suit: suit,
       rank: rank,
       points: points,
-      image: "../Card Images/" + (cardNumber + 1) + ".png",
+      image: "../Card Images/" + (cardNumber + 1) + ".jpg",
       owner: 0,
-      element: null
+      element: null,
+      inPlay: false
     };
   }
 
   function shuffle(deck) {
     var currentIndex = deck.length,
-        temporaryValue, randomIndex;
+      temporaryValue, randomIndex;
 
     while (0 !== currentIndex) {
 
@@ -199,7 +238,7 @@ var module = (function () { // nothing should be before this line
       deck[currentIndex] = deck[randomIndex];
       deck[randomIndex] = temporaryValue;
     }
-    
+
     return deck;
   }
 
@@ -212,6 +251,7 @@ var module = (function () { // nothing should be before this line
       cardOwner++;
     }
   }
+
   function dealHand() {
     var theCards = [];
 
@@ -243,7 +283,7 @@ var module = (function () { // nothing should be before this line
     cardOffsets = activeCardElement.getBoundingClientRect();
     dragCard(event);
     render();
-    
+
     document.addEventListener('mousemove', dragCard);
     document.addEventListener('mouseup', dragEnd);
 
@@ -265,27 +305,33 @@ var module = (function () { // nothing should be before this line
   function dragEnd(event) {
     dragging = false;
 
+    priorSelectedCard = selectedCard;
     selectedCard = players[currentPlayer].activeCard;
 
     var cardBelongsToPlayer = selectedCard.owner == currentPlayer, // evalutates to true or false
-        playArea = document.getElementById("playArea").getBoundingClientRect(),
-        playXMin = playArea.left,
-        playXMax = playArea.right,
-        playYMax = playArea.bottom,
-        playYMin = playArea.top,
-        blindIsOver = cardsBuried >= 2,
-        cardInPlayArea = (x >= playXMin && x < playXMax && y >= playYMin && y < playYMax); //ADJUST FOR NEW PLAY AREA
+      playArea = document.getElementById("cardPlayZone").getBoundingClientRect(),
+      playXMin = playArea.left,
+      playXMax = playArea.right,
+      playYMax = playArea.bottom,
+      playYMin = playArea.top,
+      blindIsOver = cardsBuried >= 2,
+      cardInPlayArea = (x >= playXMin && x < playXMax && y >= playYMin && y < playYMax); //ADJUST FOR NEW PLAY AREA
 
     if (blindIsOver && cardInPlayArea) {
+
+      if (priorSelectedCard) {
+        if (priorSelectedCard.inPlay) {
+          priorSelectedCard.inPlay == false;
+        }
+      }
+
       placeCard = true;
       selectedCard.element.removeEventListener('touchstart', dragStart);
+      selectedCard.inPlay = true;
+      cardsSelected++;
+      nextPlayer += 1;
 
-      topCard++;
-      currentPlayer += 1;
-
-      if (currentPlayer == 3) currentPlayer = 0;
-
-//      cardPlayed();
+      if (nextPlayer == 3) nextPlayer = 0;
     } else {
       placeCard = false;
     }
@@ -301,16 +347,19 @@ var module = (function () { // nothing should be before this line
 
     // this renders cards if the next player is not the same as the current
     if (currentPlayer != nextPlayer) {
-      currentPlayer = nextPlayer;
-      renderHands();
-      rotateCards();
+      if (rerenderHands == true) {
+        currentPlayer = nextPlayer;
+        renderHands();
+        rotateCards();
+      }
+      rerenderHands = false;
     }
-
+    var priorActiveCard = players[currentPlayer].priorActiveCard;
     var activeCard = players[currentPlayer].activeCard;
 
     // check data, use that data to change DOM
     if (activeCard) {
-      
+
       var activeCardElement = activeCard.element; //move to dragstart and save top as y offset and left as x offset
 
       if (dragging) {
@@ -318,7 +367,6 @@ var module = (function () { // nothing should be before this line
         activeCardElement.style.position = "relative";
         activeCardElement.style.top = (y - cardOffsets.top) + 'px'; //Use these lines to move the cards fluidly
         activeCardElement.style.left = (x - cardOffsets.left - 70) + 'px';
-        activeCardElement.style.zIndex = topCard;
       }
 
       // deals with placement of cards in playarea
@@ -330,7 +378,30 @@ var module = (function () { // nothing should be before this line
           activeCardElement.style.zIndex = "";
           activeCardElement.style.marginLeft = "";
         }
-        
+        if (placeCard) {
+          if (priorActiveCard)
+            if (!priorActiveCard.inPlay) {
+              priorActiveCard.style.position = "relative";
+              priorActiveCard.style.transitionDuration = "0.3s";
+              priorActiveCard.style.transform = "";
+            }
+          activeCardElement.style.position = "absolute";
+          activeCardElement.style.transitionDuration = "0s";
+          activeCardElement.style.top = (-215) + 'px';
+          activeCardElement.style.left = (312) + 'px';
+          activeCardElement.style.transform = "";
+
+        }
+        console.log(priorActiveCard);
+        if (priorActiveCard && cardsSelected > 1) {
+          priorActiveCard.element.style.position = "relative";
+          priorActiveCard.element.style.transitionDuration = "0.3s";
+          priorActiveCard.element.style.top = (215) + 'px';
+          priorActiveCard.element.style.left = (-312) + 'px';
+
+        }
+
+        players[currentPlayer].priorActiveCard = players[currentPlayer].activeCard;
         players[currentPlayer].activeCard = null;
         activeCard = null;
       }
@@ -340,7 +411,7 @@ var module = (function () { // nothing should be before this line
   }
 
   return {
-    nextPlayer: rotatePlayers
+    players: players
   }
 
 }()); // nothing should be past this line
